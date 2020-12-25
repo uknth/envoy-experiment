@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-3 
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: backend-3
+      env: local
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: backend-3
+        env: local
+    spec:
+      containers:
+      - name: backend-3 
+        image: backend-3
+        ports:
+        - containerPort: 12000
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 12000
+          initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-3 
+  namespace: default 
+  labels:
+    app: backend-3
+    env: local 
+  annotations: {}
+spec:
+  type: ClusterIP 
+  selector:
+    app: backend-3
+    env: local
+  ports:
+    - port: 12000
+      targetPort: 12000
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: backend-3
+  labels:
+    app: backend-3
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: "backend-3.localhost"
+      http:
+        paths:
+          - path: "/"
+            backend:
+              serviceName: backend-3
+              servicePort: 12000

@@ -1,0 +1,39 @@
+apiVersion: skaffold/v2beta5
+kind: Config
+metadata:
+  name: envoy-experiment 
+build:
+  tagPolicy:
+    sha256: {}
+  artifacts:
+    - image: backend-1
+      context: .
+      docker:
+        dockerfile: env/faker/backend-1/Dockerfile
+        cacheFrom:
+        - golang:latest
+    - image: backend-2
+      context: .
+      docker:
+        dockerfile: env/faker/backend-2/Dockerfile
+        cacheFrom:
+        - golang:latest
+    - image: backend-3
+      context: .
+      docker:
+        dockerfile: env/faker/backend-3/Dockerfile
+        cacheFrom:
+        - golang:latest
+    - image: config-1
+      context: .
+      docker:
+        dockerfile: env/faker/config-1/Dockerfile
+        cacheFrom:
+        - golang-latest
+deploy:
+  kubectl:
+    manifests:
+    - env/faker/backend-1/k8s.yaml
+    - env/faker/backend-2/k8s.yaml
+    - env/faker/backend-3/k8s.yaml
+    - env/faker/config-1/k8s.yaml
